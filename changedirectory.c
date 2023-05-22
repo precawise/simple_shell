@@ -5,7 +5,7 @@
  *
  * @datash: data relevant (environ)
  *
- * Return: -1 on failure, 0 on success.
+ * Return: 0 on success, -1 on failure.
  */
 void change_directory(data_shell *datash)
 {
@@ -29,7 +29,8 @@ void change_directory(data_shell *datash)
 	}
 	cp_strtok_pwd = cp_pwd;
 	rev_string(cp_strtok_pwd);
-	cp_strtok_pwd = _strtok(cp_strtok(NULL, "\0");
+	cp_strtok_pwd = _strtok(cp_strtok(NULL, "\0"));
+
 	if (cp_strtok_pwd != NULL)
 	{
 		cp_strtok_pwd = _strtok(NULL, "\0");
@@ -50,20 +51,19 @@ void change_directory(data_shell *datash)
 	}
 	datash->status = 0;
 	free(cp_pwd);
-
 }
 
 /**
  * change_directory_to - changes to a directory
- * given by the user
+ * given by a user
  *
  * @datash: data relevant(directories)
- * Return: -1 on failure, 0 on success
+ * Return: 0 on success, -1 on failure
  */
 void change_directory_to(data_shell *datash)
 {
 	char pwd[PATH_MAX];
-	char *dir, *cp_pwd, *cp_dir;
+	char *dir, cp_pwd, *cp_dir;
 
 	getcwd(pwd, sizeof(pwd));
 
@@ -74,7 +74,7 @@ void change_directory_to(data_shell *datash)
 		return;
 	}
 
-	cp_pwd = _strdup(pwd);
+	cp_pwd =  _strdup(pwd);
 	set_env("OLDPWD", cp_pwd, datash);
 
 	cp_dir = _strdup(dir);
@@ -92,38 +92,36 @@ void change_directory_to(data_shell *datash)
  * change_directory_previous - changes to previous directory
  *
  * @datash: data relevant (environ)
- * Return: -1 on failure, 0 on success
+ *
+ * Return: 0 on success, -1 on failure
  */
 void change_directory_previous(data_shell *datash)
 {
+	char *p_oldpwd = _getenv("OLDPWD", datash->_environ);
+	char *cp_oldpwd = p_oldpwd ? _strdup(p_oldpwd) : NULL;
+
+	if (cp_oldpwd == NULL || chdir(cp_oldpwd) == -1)
+	{
+		get_error(datash, 2);
+		free(cp_oldpwd);
+		return;
+	}
+
 	char pwd[PATH_MAX];
-	char *p_pwd, *p_oldpwd, *cp_pwd, *cp_oldpwd;
 
-	p_oldpwd = _getenv("OLDPWD", datash->_environ);
-	if (p_oldpwd == NULL)
-		cp_oldpwd = cp_pwd;
-	else
-		cp_oldpwd = _strdup(p_oldpwd);
+	getcwd(pwd, sizeof(pwd));
 
-	set_env("OLDPWD", cp_pwd, datash);
+	set_env("OLDPWD", _strdup(pwd), datash);
+	set_env("PWD", cp_oldpwd, datash);
 
-	if (chdir(cp_oldpwd) == -1)
-		set_env("PWD", cp_pwd, datash);
-	else
-		set_env("PWD", cp_oldpwd, datash);
-
-	p_pwd = _getenv("PWD", datash->_environ);
-
-	write(STDOUT_FILENO, p_pwd, _strlen(p_pwd));
+	write(STDOUT_FILENO, cp_oldpwd, _strlen(cp_oldpwd));
 	write(STDOUT_FILENO, "\n", 1);
 
-	free(cp_pwd);
-	if (p_oldpwd)
-		free(cp_oldpwd);
+	free(cp_oldpwd);
 
 	datash->status = 0;
 
-	chdir(p_pwd);
+	chdir(pwd);
 }
 
 /**
@@ -160,3 +158,4 @@ void change_directory_to_home(data_shell *datash)
 	set_env("PWD", home, datash);
 	free(p_pwd);
 	datash->status = 0;
+}
