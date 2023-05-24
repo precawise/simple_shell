@@ -19,29 +19,28 @@ void clear_info(info_t *info)
  */
 void set_info(info_t *info, char **av)
 {
-	int index = 0;
+	int i = 0;
 
-	info->filename = arguments[0];
-
-	if (info->argument)
+	info->fname = av[0];
+	if (info->arg)
 	{
-		info->argv = splitString(info->argument, " \t");
+		info->argv = strtow(info->arg, " \t");
 		if (!info->argv)
 		{
+
 			info->argv = malloc(sizeof(char *) * 2);
 			if (info->argv)
 			{
-				info->argv[0] = duplicateString(info->argument);
+				info->argv[0] = _strdup(info->arg);
 				info->argv[1] = NULL;
 			}
 		}
-		for (index = 0; info->argv && info->argv[index]; index++)
+		for (i = 0; info->argv && info->argv[i]; i++)
 			;
+		info->argc = i;
 
-		info->argc = index;
-
-		replaceAlias(info);
-		replaceVariables(info);
+		replace_alias(info);
+		replace_vars(info);
 	}
 }
 
@@ -66,7 +65,7 @@ void free_info(info_t *info, int all)
 		if (info->alias)
 			free_list(&(info->alias));
 		ffree(info->environ);
-		info->environ = NULL;
+			info->environ = NULL;
 		bfree((void **)info->cmd_buf);
 		if (info->readfd > 2)
 			close(info->readfd);

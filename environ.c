@@ -12,6 +12,7 @@ int _myenv(info_t *info)
 	return (0);
 }
 
+
 /**
  * _getenv - gets the value of an environ variable
  * @info: Structure containing potential arguments. Used to maintain
@@ -21,6 +22,7 @@ int _myenv(info_t *info)
  */
 char *_getenv(info_t *info, const char *name)
 {
+	list_t *node = info->env;
 	char *p;
 
 	while (node)

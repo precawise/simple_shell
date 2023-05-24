@@ -1,96 +1,97 @@
 #include "shell.h"
 
 /**
- * myExit - Terminate the shell
+ * _myexit - exits the shell
  * @info: Structure containing potential arguments. Used to maintain
- *         constant function prototype.
- * Return: Exit status (0) if info.argv[0] != "exit"
+ *          constant function prototype.
+ * Return: exits with a given exit status
+ *         (0) if info.argv[0] != "exit"
  */
-int myExit(info_t *info)
+int _myexit(info_t *info)
 {
-	int exitCheck;
+	int exitcheck;
 
-	if (info->argv[1])  /* Check if there is an exit argument */
+	if (info->argv[1])  /* If there is an exit arguement */
 	{
-		exitCheck = customAtoi(info->argv[1]);
-		if (exitCheck == -1)
+		exitcheck = _erratoi(info->argv[1]);
+		if (exitcheck == -1)
 		{
 			info->status = 2;
-			printError(info, "Illegal number: ");
-			_printString(info->argv[1]);
-			_printChar('\n');
+			print_error(info, "Illegal number: ");
+			_eputs(info->argv[1]);
+			_eputchar('\n');
 			return (1);
 		}
-		info->errorNumber = customAtoi(info->argv[1]);
+		info->err_num = _erratoi(info->argv[1]);
 		return (-2);
 	}
-	info->errorNumber = (-1);
+	info->err_num = -1;
 	return (-2);
 }
 
 /**
- * myCD - Change the current directory of the process
+ * _mycd - changes the current directory of the process
  * @info: Structure containing potential arguments. Used to maintain
- *         constant function prototype.
+ *          constant function prototype.
  * Return: Always 0
  */
-int myCD(info_t *info)
+int _mycd(info_t *info)
 {
 	char *s, *dir, buffer[1024];
-	int chdirRet;
+	int chdir_ret;
 
-	s = getCurrentWorkingDirectory(buffer, 1024);
+	s = getcwd(buffer, 1024);
 	if (!s)
-		_printString("TODO: >>getcwd failure emsg here<<\n");
+		_puts("TODO: >>getcwd failure emsg here<<\n");
 	if (!info->argv[1])
 	{
-		dir = getEnvironmentVariable(info, "HOME=");
+		dir = _getenv(info, "HOME=");
 		if (!dir)
-			chdirRet = /* TODO: what should this be? */
-				changeDirectory((dir = getEnvironmentVariable(info, "PWD=")) ? dir : "/");
+			chdir_ret = /* TODO: what should this be? */
+				chdir((dir = _getenv(info, "PWD=")) ? dir : "/");
 		else
-			chdirRet = changeDirectory(dir);
+			chdir_ret = chdir(dir);
 	}
-	else if (customStrcmp(info->argv[1], "-") == 0)
+	else if (_strcmp(info->argv[1], "-") == 0)
 	{
-		if (!getEnvironmentVariable(info, "OLDPWD="))
+		if (!_getenv(info, "OLDPWD="))
 		{
-			_printString(s);
-			_printChar('\n');
+			_puts(s);
+			_putchar('\n');
 			return (1);
 		}
-		_printString(getEnvironmentVariable(info, "OLDPWD=")), _putchar('\n');
-		chdirRet = /* TODO: what should this be? */
-		changeDirectory((dir = getEnvironmentVariable(info, "OLDPWD=")) ? dir : "/");
+		_puts(_getenv(info, "OLDPWD=")), _putchar('\n');
+		chdir_ret = /* TODO: what should this be? */
+			chdir((dir = _getenv(info, "OLDPWD=")) ? dir : "/");
 	}
 	else
-		chdirRet = changeDirectory(info->argv[1]);
-	if (chdirRet == -1)
+		chdir_ret = chdir(info->argv[1]);
+	if (chdir_ret == -1)
 	{
-		printError(info, "can't cd to ");
-		_printString(info->argv[1]), _putchar('\n');
+		print_error(info, "can't cd to ");
+		_eputs(info->argv[1]), _eputchar('\n');
 	}
 	else
 	{
-		setEnvironmentVariable(info, "OLDPWD", getEnvironmentVariable(info, "PWD="));
-		setEnvironmentVariable(info, "PWD", s);
+		_setenv(info, "OLDPWD", _getenv(info, "PWD="));
+		_setenv(info, "PWD", getcwd(buffer, 1024));
 	}
 	return (0);
 }
 
 /**
- * myHelp - Display help information
+ * _myhelp - changes the current directory of the process
  * @info: Structure containing potential arguments. Used to maintain
- *         constant function prototype.
+ *          constant function prototype.
  * Return: Always 0
  */
-int myHelp(info_t *info)
+int _myhelp(info_t *info)
 {
-	char **argArray;
+	char **arg_array;
 
-	argArray = info->argv;
-	_printString("help call works. Function not yet implemented \n");
+	arg_array = info->argv;
+	_puts("help call works. Function not yet implemented \n");
 	if (0)
-		_printString(*argArray); /* Temporary workaround for unused warning */
+		_puts(*arg_array); /* temp att_unused workaround */
 	return (0);
 }
