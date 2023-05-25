@@ -33,23 +33,3 @@ void print_result(const char *operation, int result)
 {
 	printf("The result is %s is: %d\n", operation, result);
 }
-
-/**
- * main - Entry point of program
- *
- * Return: 0 on success
- */
-int main(void)
-{
-	int num2 = 10;
-	int num3 = 5;
-	int sum, product;
-
-	sum = add(num2, num3);
-	product = multiply(num2, num3);
-
-	print_result("addition", sum);
-	print_result("multiplication", product);
-
-	return (0);
-}

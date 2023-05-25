@@ -12,32 +12,37 @@
 #include <fcntl.h>
 #include <errno.h>
 
-/* Buffer sizes for read and write operations */
+/* for read/write buffers */
 #define READ_BUF_SIZE 1024
 #define WRITE_BUF_SIZE 1024
 #define BUF_FLUSH -1
 
-/* Command chaining types */
+/* for command chaining */
 #define CMD_NORM	0
 #define CMD_OR		1
 #define CMD_AND		2
 #define CMD_CHAIN	3
 
-/* Conversion options for convert_number() */
+/* for convert_number() */
 #define CONVERT_LOWERCASE	1
 #define CONVERT_UNSIGNED	2
 
-/* Configuration options */
+/* 1 if using system getline() */
 #define USE_GETLINE 0
 #define USE_STRTOK 0
 
-/* History file settings */
 #define HIST_FILE	".simple_shell_history"
 #define HIST_MAX	4096
 
 extern char **environ;
 
-/* Linked list structure for storing strings */
+
+/**
+ * struct liststr - singly linked list
+ * @num: the number field
+ * @str: a string
+ * @next: points to the next node
+ */
 typedef struct liststr
 {
 	int num;
@@ -45,7 +50,28 @@ typedef struct liststr
 	struct liststr *next;
 } list_t;
 
-/* Structure for passing information between functions */
+/**
+ * struct passinfo - contains pseudo-arguements to pass into a function,
+ * allowing uniform prototype for function pointer struct
+ * @arg: a string generated from getline containing arguements
+ * @argv:an array of strings generated from arg
+ * @path: a string path for the current command
+ * @argc: the argument count
+ * @line_count: the error count
+ * @err_num: the error code for exit()s
+ * @linecount_flag: if on count this line of input
+ * @fname: the program filename
+ * @env: linked list local copy of environ
+ * @environ: custom modified copy of environ from LL env
+ * @history: the history node
+ * @alias: the alias node
+ * @env_changed: on if environ was changed
+ * @status: the return status of the last exec'd command
+ * @cmd_buf: address of pointer to cmd_buf, on if chaining
+ * @cmd_buf_type: CMD_type ||, &&, ;
+ * @readfd: the fd from which to read line input
+ * @histcount: the history line number count
+ */
 typedef struct passinfo
 {
 	char *arg;
@@ -63,24 +89,27 @@ typedef struct passinfo
 	int env_changed;
 	int status;
 
-	char **cmd_buf;
-	int cmd_buf_type;
+	char **cmd_buf; /* pointer to cmd ; chain buffer, for memory mangement */
+	int cmd_buf_type; /* CMD_type ||, &&, ; */
 	int readfd;
 	int histcount;
 } info_t;
 
 #define INFO_INIT \
 {NULL, NULL, NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, 0, 0, NULL, \
-	0, 0, 0}
+		0, 0, 0}
 
-/* Structure for built-in commands */
+/**
+ * struct builtin - contains a builtin string and related function
+ * @type: the builtin command flag
+ * @func: the function
+ */
 typedef struct builtin
 {
 	char *type;
 	int (*func)(info_t *);
 } builtin_table;
 
-/* Function declarations */
 
 /* toem_shloop.c */
 int hsh(info_t *, char **);
@@ -153,7 +182,7 @@ int _myhelp(info_t *);
 int _myhistory(info_t *);
 int _myalias(info_t *);
 
-/* toem_getline.c */
+/*toem_getline.c */
 ssize_t get_input(info_t *);
 int _getline(info_t *, char **, size_t *);
 void sigintHandler(int);
@@ -181,6 +210,8 @@ int write_history(info_t *info);
 int read_history(info_t *info);
 int build_history_list(info_t *info, char *buf, int linecount);
 int renumber_history(info_t *info);
+int _myhistory(info_t *info);
+int _myalias(info_t *info);
 
 /* toem_lists.c */
 list_t *add_node(list_t **, const char *, int);
@@ -203,62 +234,4 @@ int replace_alias(info_t *);
 int replace_vars(info_t *);
 int replace_string(char **, char *);
 
-#ifndef SHELL_H
-#define SHELL_H
-
-/* Other includes and definitions */
-
-typedef struct alias_t {
-    char *name;
-    char *value;
-    struct alias_t *next;
-} alias_t;
-
-typedef struct data_shell {
-    /* Data members of data_shell struct */
-	char* args[MAX_ARGS];
-} data_shell;
-
-void parse_line(char *line, data_shell **datash) {
-    int arg_count = 0;
-    char *token = strtok(line, " ");
-    
-    while (token != NULL && arg_count < MAX_ARGS - 1) {
-        (*datash)->args[arg_count] = token;
-        arg_count++;
-        token = strtok(NULL, " ");
-    }
-    
-    (*datash)->args[arg_count] = NULL;
-}
-
-void execute_command(data_shell *datash) {
-    pid_t pid = fork();
-
-    if (pid == -1) {
-        perror("fork");
-        exit(EXIT_FAILURE);
-    } else if (pid == 0) {
-	    if (execvp(datash->args[0], datash->args) == -1) {
-            perror("execvp");
-            exit(EXIT_FAILURE);
-        }
-    } else {int status;
-        waitpid(pid, &status, 0);
-    }
-}
-
-void free_data(data_shell **datash) {
-    free(*datash);
-    *datash = NULL;
-}
-/* Alias Commands */
-void print_aliases(alias_t *aliases);
-void print_alias(alias_t *aliases, char *name);
-void add_alias(alias_t **aliases, char *name, char *value);
-void set_alias(alias_t *aliases, char *name, char *value);
-void alias_builtin(data_shell *datash);
-
 #endif /* SHELL_H */
-
-#endif /* _SHELL_H_ */
