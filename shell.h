@@ -231,4 +231,28 @@ int replace_alias(info_t *);
 int replace_vars(info_t *);
 int replace_string(char **, char *);
 
-#endif
+#ifndef SHELL_H
+#define SHELL_H
+
+/* Other includes and definitions */
+
+typedef struct alias_t {
+    char *name;
+    char *value;
+    struct alias_t *next;
+} alias_t;
+
+typedef struct data_shell {
+    /* Data members of data_shell struct */
+} data_shell;
+
+/* Function declarations */
+
+/* Alias Commands */
+void print_aliases(alias_t *aliases);
+void print_alias(alias_t *aliases, char *name);
+void add_alias(alias_t **aliases, char *name, char *value);
+void set_alias(alias_t *aliases, char *name, char *value);
+void alias_builtin(data_shell *datash);
+
+#endif /* SHELL_H */

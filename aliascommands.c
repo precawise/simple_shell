@@ -24,7 +24,7 @@ void print_aliases(alias_t *aliases)
  */
 void print_alias(alias_t *aliases, char *name)
 {
-	allias_t *current = aliases;
+	alias_t *current = aliases;
 
 	while (current != NULL)
 	{
@@ -48,7 +48,7 @@ void add_alias(alias_t **aliases, char *name, char *value)
 	alias_t *new_alias = malloc(sizeof(alias_t));
 	alias_t *current = *aliases;
 
-	if (new_allias == NULL)
+	if (new_alias == NULL)
 	{
 		fprintf(stderr, "Memory allocation error\n");
 		return;
