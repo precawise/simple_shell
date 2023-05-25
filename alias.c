@@ -30,7 +30,7 @@ void print_alias(alias_t *aliases, char *name)
 	{
 		if (strcmp(current->name, name) == 0)
 		{
-			printf("%S='%s'\n", current->name, current->value);
+			printf("%s='%s'\n", current->name, current->value);
 			break;
 		}
 		current = current->next;
@@ -150,7 +150,7 @@ int main(void)
 
 	while (1)
 	{
-		write(STDOUT_FILENO, "$ ", 2);
+		printf("$ ");
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
